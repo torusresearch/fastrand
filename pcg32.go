@@ -1,8 +1,10 @@
 package fastrand
 
 import (
+	"bytes"
 	"crypto/rand"
 	"encoding/binary"
+	"math/big"
 )
 
 const inc = uint64(0xda3e39cb94b95bdb)
@@ -47,4 +49,14 @@ func PCG32Bounded(bound uint32) uint32 {
 	}
 
 	return uint32(multiresult >> 32)
+}
+
+// RandomBigInt returns a random big integer in the interval [0, 2^256)
+func RandomBigInt() *big.Int {
+	buf := new(bytes.Buffer)
+	binary.Write(buf, binary.LittleEndian, []uint32{PCG32(), PCG32(), PCG32(), PCG32(), PCG32(), PCG32(), PCG32(), PCG32()})
+
+	randomBigInt := new(big.Int)
+	randomBigInt.SetBytes(buf.Bytes())
+	return randomBigInt
 }
