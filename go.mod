@@ -1,3 +1,3 @@
-module github.com/cheran-senthil/fastrand
+module github.com/torusresearch/fastrand
 
 go 1.12
