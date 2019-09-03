@@ -5,12 +5,30 @@ import (
 	"crypto/rand"
 	"encoding/binary"
 	"math/big"
+
+	"github.com/torusresearch/torus-common/secp256k1"
 )
 
 const inc = uint64(0xda3e39cb94b95bdb)
 
 var randomBytes, _ = GenerateRandomBytes(8)
 var state = binary.BigEndian.Uint64(randomBytes)
+
+func GetRandomBytes() []byte {
+	return randomBytes
+}
+
+func GetState() uint64 {
+	return state
+}
+
+func SetRandomBytes(newRandomBytes []byte) {
+	randomBytes = newRandomBytes
+}
+
+func SetState(newState uint64) {
+	state = newState
+}
 
 // GenerateRandomBytes returns securely generated random bytes.
 func GenerateRandomBytes(n int) ([]byte, error) {
@@ -51,12 +69,23 @@ func PCG32Bounded(bound uint32) uint32 {
 	return uint32(multiresult >> 32)
 }
 
-// RandomBigInt returns a random big integer in the interval [0, 2^256)
+// RandomBigInt returns a random big integer in the interval [0, secp256k1.GeneratorOrder)
 func RandomBigInt() *big.Int {
 	buf := new(bytes.Buffer)
 	binary.Write(buf, binary.LittleEndian, []uint32{PCG32(), PCG32(), PCG32(), PCG32(), PCG32(), PCG32(), PCG32(), PCG32()})
 
 	randomBigInt := new(big.Int)
 	randomBigInt.SetBytes(buf.Bytes())
-	return randomBigInt
+	// return randomBigInt
+
+	if randomBigInt.Cmp(secp256k1.GeneratorOrder) == -1 {
+		return randomBigInt
+	}
+	return RandomBigInt()
+}
+
+// CryptoRandomBigInt returns a random big integer in the interval [0, secp256k1.GeneratorOrder)
+func CryptoRandomBigInt() *big.Int {
+	randomInt, _ := rand.Int(rand.Reader, secp256k1.GeneratorOrder)
+	return randomInt
 }
