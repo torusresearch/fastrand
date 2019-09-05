@@ -14,16 +14,8 @@ const inc = uint64(0xda3e39cb94b95bdb)
 var randomBytes, _ = GenerateRandomBytes(8)
 var state = binary.BigEndian.Uint64(randomBytes)
 
-func GetRandomBytes() []byte {
-	return randomBytes
-}
-
 func GetState() uint64 {
 	return state
-}
-
-func SetRandomBytes(newRandomBytes []byte) {
-	randomBytes = newRandomBytes
 }
 
 func SetState(newState uint64) {
@@ -33,8 +25,7 @@ func SetState(newState uint64) {
 // GenerateRandomBytes returns securely generated random bytes.
 func GenerateRandomBytes(n int) ([]byte, error) {
 	b := make([]byte, n)
-	_, err := rand.Read(b)
-	if err != nil {
+	if _, err := rand.Read(b); err != nil {
 		return nil, err
 	}
 
@@ -56,7 +47,6 @@ func PCG32Bounded(bound uint32) uint32 {
 	random32bits := uint64(PCG32())
 	multiresult := random32bits * bound64
 	leftover := uint32(multiresult)
-
 	if leftover < bound {
 		threshold := -bound % bound
 		for leftover < threshold {
